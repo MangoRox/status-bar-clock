@@ -4,13 +4,13 @@ let myStatusBarItem: vscode.StatusBarItem;
 let timerInterval: NodeJS.Timeout | undefined;
 let remainingSeconds = 0;
 
-export function activate({ subscriptions }: vscode.ExtensionContext) {
+export function activate(context: vscode.ExtensionContext) {
 
 
 	const myCommandId = 'startTimer';
-
+	
 	// command that prompts for timer parameters
-	subscriptions.push(vscode.commands.registerCommand(myCommandId, async () => {
+	context.subscriptions.push(vscode.commands.registerCommand(myCommandId, async () => {
 		if (timerInterval) {
 			const choice = await vscode.window.showInformationMessage(
 				'A timer is already running. Replace it?',
@@ -103,7 +103,7 @@ export function activate({ subscriptions }: vscode.ExtensionContext) {
 			return;
 		}
 
-		startTimer(totalSeconds);
+		startTimer(totalSeconds, context);
 		vscode.window.showInformationMessage(`Timer started: ${formatSecondsToHMS(totalSeconds)}`);
 	}));
 
@@ -112,8 +112,14 @@ export function activate({ subscriptions }: vscode.ExtensionContext) {
 
 	// clicking the status bar will invoke the timer prompt command
 	myStatusBarItem.command = myCommandId;
-	subscriptions.push(myStatusBarItem);
+	context.subscriptions.push(myStatusBarItem);
 
+	// get remaining seconds from previous state or 0.
+	remainingSeconds = context.globalState.get<number>('myExtension.remainingSeconds', 0);
+	// restart timer if there is seconds from previous state
+	if (remainingSeconds > 0) {
+		startTimer(remainingSeconds, context);
+	}
 	// update status bar item every second
 	setInterval(updateStatusBarItem, 1000);
 }
@@ -131,12 +137,13 @@ function updateStatusBarItem(): void {
 	myStatusBarItem.show();
 }
 
-function startTimer(totalSeconds: number): void {
+function startTimer(totalSeconds: number, context: vscode.ExtensionContext): void {
 	// stop any existing timer if any and create start new interval for updating the timer.
 	stopTimer();
 	remainingSeconds = totalSeconds;
 	timerInterval = setInterval(() => {
 		remainingSeconds -= 1;
+		context.globalState.update('myExtension.remainingSeconds', remainingSeconds);
 		if (remainingSeconds <= 0) {
 			stopTimer();
 			vscode.window.showInformationMessage('Timer finished!');
