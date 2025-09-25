@@ -1,0 +1,32 @@
+{
+	"name": "status-clock-comp4110",
+	"displayName": "Clock",
+	"description": "Shows the current time in the status bar",
+	"version": "0.0.1",
+	"private": true,
+	"engines": {
+		"vscode": "^1.100.0"
+	},
+	"categories": [
+		"Other"
+	],
+	"activationEvents": [
+		"*"
+	],
+	"main": "./out/extension.js",
+	"scripts": {
+		"vscode:prepublish": "pnpm run compile",
+		"compile": "tsc -p ./",
+		"lint": "eslint",
+		"watch": "tsc -watch -p ./"
+	},
+	"devDependencies": {
+		"@eslint/js": "^9.13.0",
+		"@stylistic/eslint-plugin": "^2.9.0",
+		"@types/node": "^24.5.2",
+		"@types/vscode": "^1.100.0",
+		"eslint": "^9.13.0",
+		"typescript": "^5.9.2",
+		"typescript-eslint": "^8.39.0"
+	}
+}
